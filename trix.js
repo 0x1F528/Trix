@@ -17,7 +17,6 @@
             
 ********************************************************************************************************************/
 
-//import { trax, Trax } from './trax.js'
 import { trax, Trax } from 'https://0x1f528.github.io/Trax/trax.js'
 
 let configProps = (node, props) => {                                    // pull attributes from an object and apply to the parent node
