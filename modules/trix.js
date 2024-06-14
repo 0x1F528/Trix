@@ -47,7 +47,7 @@ let configProps = (node, props) => {                                    // pull 
         let arg = props[attribute];
         if (typeof arg === 'function') {                                // arg is trax or at least a function
             if (inAttr) {                                               // add the input attribute
-                if (Trax.isTrax(arg)) {                              // if is a trax node, ...
+                if (Trax.isTrax(arg)) {                                 // if is a trax node, ...
                     let key = node.trix.id + "-" + inAttr;              // create a key to recognize this trax attribute
                     arg._subs.forEach( (sub) => {                       // see if this (trax) attribute has already been added by looping through the subscribers
                         if (sub.id() === key) 

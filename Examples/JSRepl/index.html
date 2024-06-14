@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Trix/Trax JS REPL</title>
+        <link rel="stylesheet" href="https://0x1f528.github.io/Trix/utils/JSRepl/jsrepl.css" />
+    </head>
+    <body>
+
+
+        <article class="code-example">
+            <header>Setting a value</header>
+            <code><pre>
+                import { trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                console.log = (x) => {
+                    const body = document.getElementsByTagName("body")[0];
+                    const text = document.createTextNode(x);
+                    const br = document.createElement("br");
+                    body.appendChild(text);
+                    body.appendChild(br);
+                }
+                <example>
+                    // add your code here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </example>
+            </pre></code>
+        </article>
+
+        <script type="module" >
+            import { createRepl } from 'https://0x1f528.github.io/Trix/utils/JSRepl/jsrepl.js'
+
+            let examples = document.getElementsByClassName('code-example');
+            for (let example of examples) {
+                createRepl(example);
+            }            
+        </script>
+        
+    </body>
+</html>

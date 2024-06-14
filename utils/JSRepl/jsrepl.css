@@ -1,3 +1,15 @@
+:root {
+  --text-size: 19px;
+  --indent-size: 4;
+}
+
+html {
+  --color-blue: #537BFF;
+  --color-gray: #5A5A5A;
+  --color-gray-light: #F2F2F2;
+  --color-gray-light-2: #eaeaea;
+}
+
 code {
     display:block;
 }
