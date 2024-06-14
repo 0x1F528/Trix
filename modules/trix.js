@@ -17,7 +17,7 @@
             
 ********************************************************************************************************************/
 
-import { trax, Trax } from 'https://0x1f528.github.io/Trax/trax.js'
+import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
 
 let configProps = (node, props) => {                                    // pull attributes from an object and apply to the parent node
     //area, base, br, col, embed, hr, img, input, link, meta, source, track, wbr cannot have child nodes
@@ -47,7 +47,7 @@ let configProps = (node, props) => {                                    // pull 
         let arg = props[attribute];
         if (typeof arg === 'function') {                                // arg is trax or at least a function
             if (inAttr) {                                               // add the input attribute
-                if (arg instanceof Trax) {                              // if is a trax node, ...
+                if (Trax.isTrax(arg)) {                              // if is a trax node, ...
                     let key = node.trix.id + "-" + inAttr;              // create a key to recognize this trax attribute
                     arg._subs.forEach( (sub) => {                       // see if this (trax) attribute has already been added by looping through the subscribers
                         if (sub.id() === key) 
@@ -70,6 +70,9 @@ let configProps = (node, props) => {                                    // pull 
                             break;
                         case 'checkbox':
                             arg(val.target.checked)                     // set the val.target.checked
+                            break;
+                        case 'onclick':
+                            (Trax.isTrax(arg)) ? arg.fire() : arg(true);// fire the event
                             break;
                         default:
                             arg(val.target.value);                      // set the val.target.value
@@ -106,13 +109,19 @@ let nodesAreEqual = (src,dst) => {                                      // consi
 
 let deregister = (nodes) => {                                           // cleanup: deregister list of nodes
     for (const node of nodes) {
-        if (typeof node === 'string' || node.nodeType == Node.TEXT_NODE || node.nodeType == Node.COMMENT_NODE) continue;
+        if (typeof node === 'string' || node.nodeType == Node.TEXT_NODE || node.nodeType == Node.COMMENT_NODE || !node.trix) continue;
         deregister(node.children);                                      // recursive: deregister child nodes
-        for (const traxInstance of node?.trix.deps) {
+        for (const traxInstance of node.trix.deps) {
             traxInstance.deregister();                                  // deregister any trax nodes created for this trix node
         }
-        if (typeof node?.trix?.cleanUp === 'function') node?.trix?.cleanUp();   // call the cleanUp function if one has been provided
+        if (typeof node.trix?.cleanUp === 'function') node.trix?.cleanUp();   // call the cleanUp function if one has been provided
     }
+}
+
+function decodeHtml(html) {                                             // from https://stackoverflow.com/a/7394787
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
 }
 
 let mergeOntoNode = (node, args) => {                                   // new list of child nodes; let's do a merge and keep what we can; reshuffling might be required 
@@ -128,11 +137,12 @@ let mergeOntoNode = (node, args) => {                                   // new l
             if (nodesAreEqual(srcNodes[s], destNodes[d])) {             // do we already have this child node?
                 node.appendChild(destNodes[d]);                         // then let's use it instead of using a new node
                 destNodes.splice( d, 1 );                               // remove from list
+                d = -1;                                                 // flag that element found
                 break;                                                  // we're done with this element; break out of this inner loop
             }
         }
-        if (d >= destNodes.length) {                                    // not in destination array
-            let nodeVal = (srcNodes[s] instanceof Element) ? srcNodes[s] : document.createTextNode(String(srcNodes[s])); // create text node if child argument is string
+        if (d >= 0) {                                                   // not in destination array
+            let nodeVal = (srcNodes[s] instanceof Element) ? srcNodes[s] : document.createTextNode(decodeHtml(String(srcNodes[s]))); // create text node if child argument is string
             node.appendChild(nodeVal);                                  // append new child node
         }
     }

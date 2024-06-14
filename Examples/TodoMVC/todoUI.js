@@ -75,11 +75,9 @@ trix(document.getElementById('todoapp')).trix(                          // find 
         ]),
         UL(
             { class:'todo-list' }, 
-            trax(filteredTodos).fct( 
-                // this function will make sure we have todo LIs for each of the filteredTodos
-                todoListItemsFromTodos(
-                    // this listItemCreator function defines how we want the todo LI to look
-                    (todo) => { 
+            trax(filteredTodos).fct(                                            // a bit of a hack here! using first 2 params of fct: the todos AND the current todoLIs value
+                todoListItemsFromTodos(                                         // this function will make sure we have todo LIs for each of the filteredTodos
+                    (todo) => {                                                 // this listItemCreator function defines how we want the todo LI to look
                         var editing = trax(false);
                         var liClass = trax(todo.completed, editing).fct( (x,y) =>  (x?'completed':'') + '' + (y?'editing':'')); 
                         var thisTodo = trax(todo.title);
