@@ -1,0 +1,12 @@
+
+body { 
+    color:white; 
+}
+
+div {
+    border: 1px black solid;
+    min-width: 4em;
+    min-height: 4em;
+    background-color: lightgray;
+    color: darkblue;
+}

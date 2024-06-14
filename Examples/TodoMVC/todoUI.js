@@ -4,10 +4,10 @@
 ********************************************************************************************************************/
 
 
-import { trax, Trax } from 'https://0x1f528.github.io/Trax/trax.js'
-import { IF, NOT, APPLY, CHOOSE, FILTER } from 'https://0x1f528.github.io/Trax/trex.js';
-import {trix} from 'https://0x1f528.github.io/Trix/trix.js'
-import { pipe, when, reconcileArrays } from 'https://0x1f528.github.io/Trax/trux.js';
+import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+import { IF, NOT, APPLY, CHOOSE, FILTER } from 'https://0x1f528.github.io/Trax/modules/trex.js';
+import { pipe, when, reconcileArrays } from 'https://0x1f528.github.io/Trax/modules/trux.js';
+import {trix} from 'https://0x1f528.github.io/Trix/modules/trix.js'
 import { todos, Todo, hasTodos, incompleteTodoCount, hasCompletedTodos } from './todos.js';
 
 const { MAIN,H1,DIV,BUTTON,INPUT,LABEL,SPAN,HEADER,FOOTER,A,UL,LI,STRONG } = trix();

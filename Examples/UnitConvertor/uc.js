@@ -1,8 +1,8 @@
-import { trax, Trax } from 'https://0x1f528.github.io/Trax/trax.js'
-import { trix } from 'https://0x1f528.github.io/Trix/trix.js'
-import { diffMapper } from 'https://0x1f528.github.io/Trax/trux.js'
+import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+import { diffMapper } from 'https://0x1f528.github.io/Trax/modules/trux.js'
+import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
 
-const {DIV,BUTTON,SECTION,ARTICLE,LEGEND,INPUT,LABEL,HR,OPTION,SELECT} = trix()
+const {DIV,BUTTON,SECTION,ARTICLE,LEGEND,INPUT,LABEL,HR,OPTION,SELECT} = trix();
 Trax.onChange(Trax.MODE.ASYNC);
 
 let lengthTable = new Map([['in',25.4],['ft',304.8],['mi',1609344],['hr',null],['mm',1],['cm',10],['dm',100],['m',1000],['km',1000000]]);
@@ -31,7 +31,7 @@ let base = trax(1000);                                                  // this 
 let CONVERTOR = (base, dimensions) => {                                 // this is a single conversion line (measure + unit); dimensions is a table of valid units
     let unit = trax(1000);                                              // selecting initial unit
     let val = trax(base, unit).fct( (x,y) => roundTo(x / y, 5) );       // take the value from base and convert to unit requested
-    let inp = trax( val() ).fct( (x) => asNumericString(x))             // strip any illegal characeters from the input
+    let inp = trax( val() ).fct( (x) => asNumericString(x))             // strip any illegal characters from the input
                     .onChange( (v) => base(asFloat(v) * unit()) );      // update the base with the input value
 
     let diff = trax(inp,val,diffMapper()).fct( (i,v,d) => d([i,v]) );   // which has changed? the input or the base value?
@@ -78,12 +78,12 @@ let CONVERSIONS = (base, dimensions) => {                               // conve
     convertors.min = trax(convertors).fct( (c) => c.length <= 2 );      // can we still remove converters
     convertors.inc = () => {                                            // but can add as many as you want
         convertors().push(CONVERTOR(base, dimensions));                 // add a new convertor
-        convertors.fire();                                              // explicitely refresh because trax handles changes to its list of dependencies, but not changes to the underlying objects
+        convertors.fire();                                              // explicitly refresh because trax handles changes to its list of dependencies, but not changes to the underlying objects
     }
     convertors.dec = () => {                                            // or remove them 
         if (convertors.min()) return;                                   // (unless we've reached the minimum number of converters to display)
         convertors().pop();                                             // get rid of the bottom convertor
-        convertors.fire();                                              // explicitely refresh because trax handles changes to its list of dependencies, but not changes to the underlying objects
+        convertors.fire();                                              // explicitly refresh because trax handles changes to its list of dependencies, but not changes to the underlying objects
     }
     return [                                                            // array of DOM elements
         convertors,

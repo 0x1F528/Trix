@@ -3,8 +3,8 @@
     
 ********************************************************************************************************************/
 
-import { trax } from 'https://0x1f528.github.io/Trax/trax.js';
-import { ARRAYLENGTH, APPLY, FILTER } from 'https://0x1f528.github.io/Trax/trex.js';
+import { trax } from 'https://0x1f528.github.io/Trax/modules/trax.js';
+import { ARRAYLENGTH, APPLY, FILTER } from 'https://0x1f528.github.io/Trax/modules/trex.js';
 
 export class Todo {                                                     // this is a todo
     constructor(txt) {
