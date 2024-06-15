@@ -10,3 +10,34 @@ div {
     background-color: lightgray;
     color: darkblue;
 }
+
+.bg-pink {
+    background-color: pink;
+}
+.bg-blue {
+    background-color: lightblue;
+}
+.bg-yellow {
+    background-color:khaki;
+}
+.bg-green {
+    background-color: lightgreen;
+}
+.bg-orange {
+    background-color:lightsalmon;
+}
+.fg-pink {
+    background-color:deeppink;
+}
+.fg-blue {
+    color: darkblue;
+}
+.fg-yellow {
+    color: darkgoldenrod;
+}
+.fg-green {
+    color: darkolivegreen;
+}
+.fg-orange {
+    color: orangered;
+}
