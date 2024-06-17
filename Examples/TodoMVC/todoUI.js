@@ -51,9 +51,7 @@ trix(document.getElementById('todoapp')).trix(                          // find 
                     ),
                     type: 'text', 
                     class: 'new-todo', 
-                    placeholder: "What needs to be done?", 
-                    autofocus: true,
-                    onfocus: (target) => target.focus({preventScroll:true})     // focus, but don't scroll
+                    placeholder: "What needs to be done?"
                 }
             })()                                                                // and evaluate 
         )
