@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="https://0x1f528.github.io/Trix/utils/JSRepl/jsrepl.css" />
         <link rel="stylesheet" href="resources/documentation.css" />
     </head>
-    <body>
+    <body id="top">
 
         <h1><mark>Trix</mark> <sup><em>a Javascript only reactive UI framework</em></sup></h1>
         <p>Inspired by solutions like <a href="https://vanjs.org/">VanJS</a>, <a href="https://www.solidjs.com/">SolidJS</a>, <a href="https://strawberry.quest/">Strawberry</a>... <mark>Trix</mark> is a <strong>minimal</strong> yet <strong>fully functional</strong> javascript only reactive UI framework.</p>
@@ -992,7 +992,8 @@ attachPoint.trix(
             let examples = document.getElementsByClassName('code-example');
             for (let example of examples) {
                 createRepl(example);
-            }            
+            }
+            window.scrollTo(0,0);
         </script>
         
     </body>
