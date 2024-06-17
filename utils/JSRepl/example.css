@@ -9,6 +9,7 @@ div {
     min-height: 4em;
     background-color: lightgray;
     color: darkblue;
+    padding: 0.5em;
 }
 
 .bg-pink {

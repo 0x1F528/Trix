@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Trix Documentation</title>
+        <link rel="stylesheet" href="https://0x1f528.github.io/Trix/utils/JSRepl/jsrepl.css" />
+        <link rel="stylesheet" href="resources/documentation.css" />
+    </head>
+    <body>
+
+        <h1><mark>Trix</mark> <sup><em>a Javascript only reactive UI framework</em></sup></h1>
+        <p>Inspired by solutions like <a href="https://vanjs.org/">VanJS</a>, <a href="https://www.solidjs.com/">SolidJS</a>, <a href="https://strawberry.quest/">Strawberry</a>... <mark>Trix</mark> is a <strong>minimal</strong> yet <strong>fully functional</strong> javascript only reactive UI framework.</p>
+        <p><mark>Trix</mark> was built with the following goals:
+            <ul class="important">
+                <li><strong>Simple</strong> and <strong>minimal</strong> APIs</li>
+                <li>Composable APIs as <strong>building blocks</strong></li>
+                <li>Trivial to build higher order abstractions and components</li>
+                <li><strong>Declarative</strong>, not imperative</li>
+                <li>Support <strong>reactive</strong> behavior</li>
+                <ul>
+                    <li>DOM nodes</li>
+                    <li>DOM node attributes</li>
+                    <li>DOM node child nodes</li>
+                </ul>
+                <li><strong>Light</strong> weight</li>
+                <li>Zero dependency</li>
+            </ul>
+        </p>
+        <p><mark>Trix</mark> reactivity is built by tight integration with the companion reactive framework <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a>.</p>
+
+        <h2>Table of contents</h2>
+        <ol class="important">
+            <li><a href="#overview">Overview</a>
+                <ol>
+                    <li><a href="#overview_glance">At a glance</a></li>
+                    <li><a href="#overview_three_apis">Three APIs called Trix</a>
+                        <ol>
+                            <li><a href="#overview_factory">trix()</a></li>
+                            <li><a href="#overview_trixify">trix(domNode)</a></li>
+                            <li><a href="#overview_children">domNode.trix( ...children )</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#overview_higher_level">Higher level components</a></li>
+                    <li><a href="#overview_trax">Trax integration for reactivity</a></li>
+                    <li><a href="#overview_usage">Usage</a></li>
+                    <li><a href="#overview_code">Source code</a></li>
+                </ol>
+            </li>
+            <li><a href="#tutorial">Tutorial</a>
+                <ol>
+                    <li><a href="#tutorial_overview_example">The example from the overview</a></li>
+                    <li><a href="#tutorial_child_nodes">Updating the list of child nodes</a></li>
+                    <li><a href="#tutorial_child_nodes_optimized">Updating the list of child nodes (optimized)</a></li>
+                    <li><a href="#tutorial_app">APP component</li>
+                    <li><a href="#tutorial_child_node_arrays">Child nodes as arrays</a></li>
+                    <li><a href="#tutorial_attributes">Node attributes</a></li>
+                    <li><a href="#tutorial_trax">Adding reactivity with Trax</a></li>
+                    <li><a href="#tutorial_events">Capturing UI events</a></li>
+                    <li><a href="#tutorial_checkbox">Checkbox</a></li>
+                    <li><a href="#tutorial_radio">A better Radio component</a></li>
+                    <li><a href="#tutorial_selector">Selector component</a></li>
+                    <li><a href="#tutorial_locality">Maintaining locality</a></li>
+                    <li><a href="#tutorial_memory_cleanup">Memory cleanup</a></li>
+                    <li><a href="#tutorial_blank_canvas">Blank canvas</a></li>
+                </ol>
+            </li>
+            <li><a href="#trix_apis"><mark>Trix</mark> APIs</a>
+                <ol>
+                    <li><a href="#trix_api_trix">trix( )</a></li>
+                    <li><a href="#trix_api_trixify">trix( node )</a></li>
+                    <li><a href="#trix_api_children">trix( ...children )</a></li>
+                </ol>
+            </li>
+            <li><a href="#sample_applications">Sample applications</a>
+                <ol>
+                    <li><a href="#sample_todomvc">TodoMVC</a></li>
+                    <li><a href="#sample_unit_converter">Unit converter</a></li>
+                    <li><a href="#sample_jsrepl">Javascript REPL</a></li>
+                </ol>
+            </li>
+            <li><a href="#Acknowledgements">Acknowledgements</a></li>
+        </ol>
+
+        <h2 id="overview">Overview</h2>
+        <h4 id="overview_glance">At a glance</h4>
+        <article class="code-example">
+            <header>At a glance</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                const {H1, P, DIV, SPAN, EM} = trix();
+                trix('app').trix(
+                <example>
+                    H1("Hello there!"),
+                    P(`Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                        Mauris iaculis, sapien sed interdum tincidunt, 
+                        massa libero pretium nibh, eu egestas velit elit sit amet leo.`),
+                    DIV ( 
+                            { 
+                                style: 'width:10em;height:5em;'
+                            }, 
+                            SPAN(
+                                "Proin ",
+                                EM({ style:'color:red'}, "non ligula"),
+                                " quis urna egestas imperdiet a non dui."
+                            )
+                        )
+                </example>
+                );
+            </pre></code>
+        </article>
+        <p>Can you guess what this code might do?</p>
+        <p>Click the run button at the top right of the REPL window.</p>
+
+
+        <h4 id="overview_three_apis">Three APIs called <mark>Trix</mark></h4>
+        <ol>
+            <li><h5 id="overview_factory" style="display:inline-block;margin:0;"><mark>trix</mark>()</h5>
+                <p>to create DOM node factory functions</p>
+                <code><pre>
+const {H1, P, DIV, SPAN, TEXT} = trix();
+let container = DIV(); // <-- container is a div DOM node
+                </pre></code>
+                For readability, factory functions use ALL CAPS by convention.
+            </li>
+            <li><h5 id="overview_trixify" style="display:inline-block;margin:0;"><mark>trix</mark>( domNode )</h5>
+                <p>to trixify a DOM node</p>
+                <code><pre>
+const attachPoint = document.getElementById('attachPoint');
+trix(attachPoint);  // <-- trixify the node (adds a trix() method to the DOM node)</pre>
+                </code>
+                or let <mark>trix</mark>() lookup the node by id<code>
+                <pre>
+trix('#attachPoint');  // <-- lookup + trixify the node</pre>
+                </code>
+                <p style="margin-top:0;margin-bottom:2em;">Note, all DOM nodes created using the factory functions are already trixified.</p>
+            </li>
+            <li><h5 id="overview_children" style="display:inline-block;margin:0;">domNode.<mark>trix</mark>( ...children )</h5>
+                <p>use the <mark>trix</mark> method added to the DOM node to set its list of child nodes</p>
+                <code><pre>
+container.trix("I am a container div");
+attachPoint.trix(
+    H1('This is an application with a container'),
+    container
+);
+                </pre></code>
+            </li>
+        </ol>
+
+        <h4 id="overview_higher_level">Higher level components</h4>
+        <p>At its base, <mark>Trix</mark> is mostly syntactic sugar around the DOM APIs that allows you to write in an 'HTML' readable way. 
+            But as we are working in javascript and not HTML, we have the full power of a turing complete language to build higher level abstractions.</p>
+        <p>For example, to create a new EMAIL component that highlights the @ symbol in emails...</p>
+        <article class="code-example">
+            <header>Higher level component</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                const {P, MARK, ADDRESS} = trix();
+                let p = P();
+                let content = p.trix;
+                trix('app').trix(p);
+                <example>
+                    let EMAIL = (email) => {
+                        let parts = email.split('@');
+                        return ADDRESS([parts[0], MARK('@'),parts[1]]);
+                    }
+                    content(
+                        EMAIL('myself@gmail.com'),
+                        EMAIL('freddy@trixy.com')
+                    )
+                </example>
+            </pre></code>
+        </article>
+
+        <p>Expand the code (top-left icon) to see the full context and how the content function was created. 
+            After you go through the tutorial you should understand how this works.</p>
+
+
+        <h4 id="overview_trax"><a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> integration for reactivity</h4>
+        <p>Trix uses the companion framework <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> for reactivity. Any API parameter can be a reactive <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> element. 
+            Changes to the <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> elements will immediately be reflected in the UI. 
+            The <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> nodes used in the UI are made <em>Live</em> by <mark>Trix</mark></p>
+        <p>Application state is managed within the <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> elements and only declaratively linked to the DOM nodes.</p>
+        <p>Logically we end up with a similar paradigm to React Flux: UI event -> update to <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> element -> update to trixified DOM node</p>
+        <p>Trixified DOM nodes can be sources of UI events and directly mapped to <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> elements.</p>
+        <p>It's probably a good idea to take a quick look at the <a href="https://0x1f528.github.io/Trax/index.html#overview"><mark>Trax</mark> overview</a> at this time.</p>
+
+        <h4 id="overview_usage">Usage</h4>
+        <code>import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'</code>
+        <code>import { trix } from 'https://0x1f528.github.io/Trax/modules/trax.js'  // you will likely want this too for reactivity</code>
+
+        <h4 id="overview_code">Source code</h4>
+        <p>The source code is available in github under <a href="https://github.com/0x1F528/Trix">https://github.com/0x1F528/Trix</a></p>
+
+        <h2 id="tutorial">Tutorial</h2>
+        <p>Much of what you need to know was already covered in the Overview.
+            But let's walk through the steps one-by-one using an interactive REPL. There are still some details and edge-cases you will need to be aware of.</p>
+
+        <h4 id="tutorial_overview_example">The example from the overview</h4>
+
+        <article class="code-example">
+            <header>Overview example</header>
+            <code><pre>
+                <example>
+                    import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                    import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                    Trax.onChange(Trax.MODE.ASYNC);     // <-- for UI reactivity ASYNC mode is recommended
+                    
+                    const {H1, P, DIV, SPAN, TEXT} = trix();
+
+                    let container = DIV(); // <-- is a div DOM node
+                    
+                    const attachPoint = document.getElementsByTagName('app')[0];
+                    trix(attachPoint);  // <-- trixify the node (adds a trix() method to the DOM node)
+
+                    container.trix("I am a container div");  // <-- set the container's child
+                    
+                    attachPoint.trix(
+                        H1('This is an application with a container'),
+                        container
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p>Note, the REPL already has a &lt;app&gt;&lt;/app&gt; tag, so we will use that instead of the attachPoint id from the overview.</p>
+        <p>Try adding a TEXT( 'Yoohoo' ) node after the container.</p>
+
+        <h4 id="tutorial_child_nodes">Updating the list of child nodes</h4>
+        <p class="important">Going forward we will hide the <mark>trix</mark> and <mark>trax</mark> imports in the context. Click the context icon top-left of the REPL window to see it.</p>
+
+        <article class="code-example">
+            <header>Changing the child nodes</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                <example>
+                    const {P, DIV} = trix();
+                   
+                    let app = trix('app').trix(
+                        P('First Line'),
+                        P('Last Line')
+                    );
+
+                    setTimeout( () => 
+                        app.trix(
+                            P('First Line'),
+                            DIV('In the middle'),
+                            P('Last Line')
+                        ), 2000
+                    )
+                </example>
+            </pre></code>
+        </article>
+
+        <p>After 2 seconds we change the list of child nodes.</p>
+        <p>Unfortunately in this case, we are deleting the existing nodes and re-injecting new ones.</p>
+        <p>Note that <code>DIV('In the middle')</code> is the same as the two step <code>let d = DIV();</code><code>d.trix('In the middle');</code> or finally <code>DIV().trix('In the middle')</code></p>
+
+        <h4 id="tutorial_child_nodes_optimized">Updating the list of child nodes (optimized)</h4>
+
+        <article class="code-example">
+            <header>Changing the child nodes (optimized)</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                <example>
+                    const {P, DIV} = trix();
+                   
+                    let p1 = P('First Line');
+                    let p2 = P('Last Line');
+                    let app = trix('app').trix(
+                        p1, 
+                        p2
+                    );
+
+                    setTimeout( () => 
+                        app.trix(
+                            p1,
+                            DIV('In the middle'),
+                            p2
+                        ), 2000
+                    )
+                </example>
+            </pre></code>
+        </article>
+
+        <p>You can't tell from running this, but since we are using the same p1 and p2 DOM nodes when updating the list of child nodes 
+            <mark>Trix</mark> will move nodes around and not rebuild and replace them.</p>
+
+    
+        <h4 id="tutorial_app">APP component</h4>
+        <p>Maybe not the most useful, but it makes for beautiful code :-)</p>
+
+        <article class="code-example">
+            <header>APP component</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                <example>
+                    const {DIV, P} = trix();
+                    let APP = trix('app').trix;
+
+                    APP(
+                        DIV("I am a div"),
+                        P("And a paragraph with nothing to say :-(")
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p class="important">We will use this APP() shortcut going forward; the definition will be hidden in the context.</p>
+    
+        <h4 id="tutorial_child_node_arrays">Child nodes as arrays</h4>
+
+        <p>As we have seen, the node.<mark>trix</mark>( ...children ) API can take a list of child nodes.</p>
+        <p>But it can also take a list of strings (=> Text Nodes), Trax elements, and/or arrays of child nodes.</p>
+
+        <article class="code-example">
+            <header>Child node arrays</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {P} = trix();
+                   
+                    let children = [
+                        P('First Line'), 
+                        "Some text ",
+                        [
+                            "and an array of text ",
+                            trax("with some text being wrapped "),
+                            trax(["in"," a"," trax"," element"])
+                        ],
+                        P('Last Line')
+                    ];
+
+                    APP(
+                        children
+                    );
+                </example>
+            </pre></code>
+        </article>
+
+        <p>In fact, <mark>Trix</mark> will <a href="https://4geeks.com/how-to/javascript-array-flatten">flatten</a> the list/array of child nodes no matter how deep the arrays are nested.</p>
+        <p>As long as we use the same DOM nodes they will be rearranged based on the input and wont be destroyed and recreated.</p>
+
+        <h4 id="tutorial_attributes">Node attributes</h4>
+
+        <p>To set a node's attributes, pass a javascript object (name:values) along with the list of child nodes.</p>
+
+        <article class="code-example">
+            <header>Attributes</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {P, DIV} = trix();
+                   
+                    APP(
+                        DIV("Some text with ",
+                            P(
+                                "emphasis", 
+                                {style: "background-color:pink; font-size:3em;color:red"}
+                            ), 
+                            { style: "background-color:blue;color:white;"}
+                        )
+                    );
+                </example>
+            </pre></code>
+        </article>
+
+        <h4 id="tutorial_trax">Adding reactivity with <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a></h4>
+
+        <p>The <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> reactive framework integrates into <mark>Trix</mark>. 
+            UI nodes that are defined using <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> nodes are automatically updated when that <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> node updates.
+            <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> can hold values for text, attributes, and even <mark>Trix</mark> DOM nodes.
+        </p>
+
+        <article class="code-example">
+            <header>Trax</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {P, DIV} = trix();
+                   
+                    let text = trax("Emphasis");                            // trax holds the text
+                    let clazz = trax("bg-yellow");                          // trax holds the class attribute
+                    let div = DIV( text, { class: clazz } );
+                    let node = trax(div);                                   // trax holds the DOM node
+
+                    APP(
+                        node                                                // add the node to the UI
+                    );
+                    setTimeout( () => text( "This is important" ), 2000 );  // change the text
+                    setTimeout( () => clazz( "bg-pink"), 4000 );            // change the background color
+                    setTimeout( () => node( P(text) ), 6000 );              // change from div to p
+                </example>
+            </pre></code>
+        </article>
+
+        <p>What happens if you add the line ~~ div.innerHTML = "Something Wonderful" ~~ at the end?</p>
+        <p>You still have a handle to the DOM nodes you created and can affect them directly using the standard DOM APIs.</p>
+        <p>How about adding ~~ div.trix("Something Wonderful") ~~ at the end?</p>
+
+        <h4 id="tutorial_events">Capturing UI events</h4>
+
+        <p><a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> elements can also be used to capture UI events like clicks, input field updates, ...</p>
+
+        <article class="code-example">
+            <header>UI events</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {FIELDSET, LEGEND, DIV, LABEL, INPUT, BUTTON, SPAN, BR} = trix();
+
+                    let counter = trax(0).fct( (c, v) => (v||c) + 1 );
+                    let my_text = trax('Change me');
+
+                    APP(
+                        DIV(
+                            FIELDSET(
+                                LEGEND("Inputs"),
+                                LABEL( "Input One: ", { for: "input1" } ),
+                                INPUT( 
+                                    { 
+                                        id:"input1", 
+                                        io: my_text 
+                                    }
+                                ),
+                                BR(),
+                                LABEL( "Input Two: ", { for: "input2" } ),
+                                INPUT( 
+                                    { 
+                                        id:"input2", 
+                                        io: my_text 
+                                    }
+                                )
+                            ),
+                            BR(),BR(),
+                            FIELDSET(
+                                LEGEND("Counter"),
+                                BUTTON( 
+                                    "Click Me",
+                                    {
+                                        onclick: counter
+                                    } 
+                                ),
+                                SPAN(" The counter is ", counter )
+                            )
+                        )
+                    );
+                </example>
+            </pre></code>
+        </article>
+
+        <p>There is a bit to unravel here.</p>
+        <ul>
+            <li>The LABEL One is associated with the INPUT one</li>
+            <li>Both INPUT fields use the same <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> value for input and output</li>
+            <li>Updating one field is immediately reflected in the other</li>
+            <li>The "io" attribute is a special synthetic attribute managed by <mark>Trix</mark>; it corresponds to a combination of the two attributes <code style="display: inline;">{ value: my_text, oninput: my_text }</code></li>
+            <li>The value attribute sets the field to the value of my_text, and the oninput attribute updates the my_text <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> node</li>
+            <li>We define a <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> counter element that will increment its value "v" (or initial "c" value) every time it is called; check out the documentation <a href="https://0x1f528.github.io/Trax/#trax_api_fct">here</a></li>
+            <li>The Click Me BUTTON triggers "counter" every time it is clicked.</li>
+            <li>The SPAN shows the counter starting as 1 because displaying the initial counter value is already calling it once => and thus incrementing once</li>
+        </ul>
+        <p>Try playing around with this a bit: </p>
+        <ul>
+            <li>Click on the two labels and see which INPUT field receives focus</li>
+            <li>Update the text in one input field, then in the other</li>
+            <li>Click on the increment button</li>
+            <li>Try adding code to display the current my_text value in a span after the counter</li>
+            <li>While reactive setting of attributes has to be done using <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a>, event handling will work using any function; try replacing the onclick handler with your own function</li>
+        </ul>
+
+        <h4 id="tutorial_checkbox">Checkbox</h4>
+        <p>We saw in the previous example that <mark>Trix</mark> implements a special "io" attribute so that a single <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instance can be used both for input (aka value) and output (aka onchange).</p>
+        <p>Similarly, <mark>Trix</mark> also implements "checkbox" for radio buttons, selectors, and checkboxes: input: "checked", output: "onchange"</p>
+
+        <article class="code-example">
+            <header>Checkbox</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {FIELDSET, LEGEND, LABEL, INPUT, BUTTON, SPAN, BR} = trix();
+                    let CHECKBOX = (id, label, checker, ...args) => 
+                        [
+                            LABEL( {for:id}, label ),
+                            INPUT( { type:"checkbox", checkbox:checker, id:id}, ...args ),
+                        ]
+                    let RADIO = (id, label, group, chooser, ...args) => 
+                        [
+                            LABEL( {for:id}, label ),
+                            INPUT( { type:"radio", checkbox:chooser, id:id, name:group}, ...args )
+                        ]
+
+                    let checked = trax(true);
+                    let chosen1 = trax(true);
+                    let chosen2 = trax(false);
+                    let chosen3 = trax(false);
+
+                    APP(
+                        FIELDSET(
+                            LEGEND("Checkboxes"),
+                            CHECKBOX( "checkbox1", "Checkbox One", checked ),
+                            BR(),
+                            CHECKBOX( "checkbox2", "Checkbox Two", checked ),
+                            BR(),
+                            "Checkboxes are ", SPAN(checked)
+                        ),
+                        BR(),
+                        FIELDSET(
+                            LEGEND("Radio buttons"),
+                            RADIO( "radio1", "Radio One", "rb", chosen1 ),
+                            BR(),
+                            RADIO( "radio2", "Radio Two", "rb", chosen2 ),
+                            BR(),
+                            RADIO( "radio3", "Radio Three", "rb", chosen3 ),
+                        )
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p>This example also shows how easy it is to create higher level components (aka javascript functions). 
+            The CHECKBOX and RADIO functions create both the DOM node and the accompanying label.</p>
+
+        <h4 id="tutorial_radio">A better Radio component</h4>
+        <p>The previous Radio component is a bit awkward - we had to create a trax instance for each radio button. Let's improve this.</p>
+
+        <article class="code-example">
+            <header>Radio component</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {FIELDSET, LEGEND, LABEL, INPUT, BUTTON, SPAN, BR} = trix();
+                    let RADIO = (id, label, group, chooser, ...args) => {
+                        let choice = trax(chooser, id).fct( (c,i) => c === i );
+                        return [
+                            LABEL( {for:id}, label ),
+                            INPUT( { type:"radio", id:id, name:group, checked:choice, onchange: () => chooser(id) }, ...args )
+                        ]
+                    }
+                    let chosen = trax("radio1");
+
+                    APP(
+                        FIELDSET(
+                            LEGEND("Radio buttons"),
+                            RADIO( "radio1", "Radio One", "rb", chosen ),
+                            BR(),
+                            RADIO( "radio2", "Radio Two", "rb", chosen ),
+                            BR(),
+                            RADIO( "radio3", "Radio Three", "rb", chosen ),
+                            BR(),
+                            "The choice is ", SPAN(chosen),
+                            BR(),
+                            BUTTON( 
+                                "Set to Radio Two",
+                                {
+                                    onclick: () => chosen("radio2")
+                                } 
+                            )
+                        ),
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p>In this case, instead of using the synthetic <mark>Trix</mark> checkbox attribute, we use the checked and onchange attributes separately.</p>
+        <p>The new choice <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instance returns true/false depending if the chooser equals the current id. 
+            We use this to determine if a particular radio button is checked.</p>
+        <p>As for the onchange behavior, we added an inline function to set the chooser value to the current id when selected.</p>
+        <p>An alternate implementation would be to use a form wrapping around the radio buttons and then setting the selection on the form.</p>
+
+        <h4 id="tutorial_selector">Selector component</h4>
+        <p>While we are at it, let's create a SELECTOR component.</p>
+
+        <article class="code-example">
+            <header>Selector component</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {FIELDSET, LEGEND, LABEL, INPUT, BUTTON, SELECT, OPTION, SPAN, BR} = trix();
+                    let SELECTOR = (id, label, selections, selected, ...args) => 
+                        [
+                            LABEL( {for:id}, label ),
+                            SELECT( 
+                                {id:id, io: selected},
+                                selections.map( (item) => OPTION( { value: item.value }, item.label )),
+                                ...args
+                            )
+                        ]
+                    let selected = trax("dog");
+                    APP(
+                        FIELDSET(
+                            LEGEND("Selection"),
+                            SELECTOR(
+                                "pet_selector", 
+                                "Select a pet ", 
+                                [
+                                    { value:"dog", label: "Dog" },
+                                    { value:"cat", label: "Cat" },
+                                    { value:"hamster", label: "Hamster" },
+                                    { value:"parrot", label: "Parrot" },
+                                    { value:"goldfish", label: "Goldfish" }
+                                ], 
+                                selected),
+                            BR(),
+                            "Pet is ", SPAN(selected),
+                            BR(),
+                            BUTTON( 
+                                "Set to Goldfish",
+                                {
+                                    onclick: () => selected("goldfish")
+                                } 
+                            )
+                        )
+                    );
+                </example>
+            </pre></code>
+        </article>
+
+        <h4 id="tutorial_locality">Maintaining locality</h4>
+        <p>One of the issues that comes up with large <mark>Trix</mark> applications is that we can end up with many <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instances far removed from where they are actually used in the <mark>Trix</mark> DOM structure. 
+            This makes following the code harder and can become a source of bugs.</p>
+        <p>A good practice is to keep the application logic together and the UI pieces together. Only that data that is needed by both should bridge across the two areas.</p>
+        <p>As an overly simplified - and thus not too compelling - example, let's take a string (in the application logic) and show the number of characters in the UI</p>
+
+        <article class="code-example">
+            <header>Locality</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {P} = trix();
+
+                    let str = trax("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+                    let strlength = trax(str).fct( (s) => s.length );
+
+                    APP(
+                        P(str),
+                        P(strlength)
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p>The strlength value is a derived value only of interest to the UI. The str however is application wide logic and will bridge the application and UI.</p>
+
+        <article class="code-example">
+            <header>Improved locality</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {P} = trix();
+
+                    let str = trax("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+                    APP(
+                        P(str),
+                        P( trax(str).fct( (s) => s.length ) )
+                    );
+                </example>
+            </pre></code>
+        </article>
+        
+
+        <p>In a more complex situation we may want to use an <a href="https://developer.mozilla.org/en-US/docs/Glossary/IIFE">iife:</a></p>
+        <article class="code-example">
+            <header>Locality using an iife</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {P} = trix();
+
+                    let str = trax("Lorem ipsum dolor sit amet, consectetur adipiscing elit");
+
+                    APP(
+                        (() => {
+                            let filtered = trax(str).fct( (s) => s.replace(/[aeiou]/g, "") );
+                            let strlength = trax(filtered).fct( (s) => s.length );
+                            return [
+                                P(str),
+                                P( filtered ),
+                                P( strlength )
+                            ];
+                        })()
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p>Try updating the code above so that you can change the str and see the output on the fly.</p>
+
+
+        <h4 id="tutorial_memory_cleanup">Memory cleanup</h4>
+        <p>In most cases <mark>Trix</mark> (and <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a>) will clean up after itself, but there are situations where memory leaks can occur.</p>
+        <p>Specifically, when you create <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instances as part of component functions they may still be "attached" even after the component goes away.</p>
+
+        <article class="code-example">
+            <header>Memory leak</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                import { prettyJSON } from 'https://0x1f528.github.io/Trax/modules/trux.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {DIV, P, PRE, BUTTON} = trix();
+
+                    let COMPONENT = (r, id) => {
+                        let leaf = trax(r).id("leaf-"+id);
+                        return DIV( 
+                            P(leaf), 
+                            P(leaf.id)
+                        );
+                    }
+
+                    let root = trax("Some value").id("root");
+                    let components = trax([
+                        COMPONENT(root, 1),
+                        COMPONENT(root, 2)
+                    ]);
+                    let subscribers = trax().fct( 
+                        () => PRE( prettyJSON(root.subs()) ) 
+                    )
+                    let remove_component = () => {
+                        components().pop();                     // drop one of the components
+                        components.fire();                      // fire a refresh of the component list
+                        subscribers.fire();                     // fire a refresh of the JSON dependency tree
+                    };
+                    
+                    APP(
+                        components,
+                        BUTTON( { onclick: remove_component }, "Remove Component" ),
+                        DIV(subscribers, { class:"bg-pink"})
+                    );
+                </example>
+            </pre></code>
+        </article>
+
+        <p>Untangling the example:
+            <ul>
+                <li>We have a single root <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instance...</li>
+                <li>...that is wrapped in a new <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instance leaf for each COMPONENT</li>
+                <li>The COMPONENT is a div with two paragraphs: the first the leaf value, the second the leaf id</li>
+                <li>We create an array of two COMPONENTs and wrap that in a <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> components instance</li>
+                <li>We also create a subs <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> instance that shows the JSON dependency tree of root</li>
+                <li>The root dependency tree is pretty printed in the pink div</li>
+                <li>Observe the two components and the dependency tree showing two leaf nodes</li>
+                <li>Click on the [Remove Component] button to remove the component containing leaf-2 from the array and notify dependents by calling fire()</li>
+                <li>Observe that we only have a single components but still two leaf nodes in the dependency tree</li>
+            </ul>
+        </p>
+        <p>Notice how the dependency tree still shows two leaf-1 <strong>and leaf-2</strong> nodes even after the component has disappeared. <em>This is a memory leak.</em></p>
+
+        <p>We can fix the memory leak by passing in a cleanup function using the <mark>Trix</mark> specific cleanup attribute. 
+            When the DIV is removed from the DOM, <mark>Trix</mark> will also call any cleanup code provided. The <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> prune() method completely unhooks the instance from the dependency tree.</p>
+
+        <article class="code-example">
+            <header>Memory leak fixed</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                import { prettyJSON } from 'https://0x1f528.github.io/Trax/modules/trux.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    const {DIV, P, PRE, BUTTON} = trix();
+
+                    let COMPONENT = (r, id) => {
+                        let leaf = trax(r).id("leaf-"+id);
+                        return DIV( 
+                            P(leaf), 
+                            P(leaf.id),
+                            { cleanup: () => leaf.prune() }     // <-- this is the fix!
+                        );
+                    }
+
+                    let root = trax("Some value").id("root");
+                    let components = trax([
+                        COMPONENT(root, 1),
+                        COMPONENT(root, 2)
+                    ]);
+                    let subscribers = trax().fct( 
+                        () => PRE( prettyJSON(root.subs()) ) 
+                    )
+                    let remove_component = () => {
+                        components().pop();                     // drop one of the components
+                        components.fire();                      // fire a refresh of the component list
+                        subscribers.fire();                     // fire a refresh of the JSON dependency tree
+                    };
+                    
+                    APP(
+                        components,
+                        BUTTON( { onclick: remove_component }, "Remove Component" ),
+                        DIV(subscribers, { class:"bg-pink"})
+                    );
+                </example>
+            </pre></code>
+        </article>
+        <p>This time you see that the JSON dependency tree in the pink div no longer contains leaf-2.</p>
+
+        <h4 id="tutorial_blank_canvas">Here is a blank canvas for you to try things out :-)</h4>
+        
+        <article class="code-example">
+            <header>Have fun</header>
+            <code><pre>
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                Trax.onChange(Trax.MODE.ASYNC);
+                let APP = trix('app').trix;
+                <example>
+                    // a bit of boilerplate to get you started:
+
+                    const {FIELDSET, LEGEND, LABEL, INPUT, BUTTON, DIV, P, SPAN, BR} = trix();
+
+                    APP(
+                        DIV("Hello, I am a div")
+                    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </example>
+            </pre></code>
+        </article>
+
+
+ 
+        <h2 id="trix_apis"> <mark>Trix</mark> APIs</h2>
+
+        <h5 id="trix_api_trix"><mark>trix</mark>()</h5>
+        Creates a new <mark>Trix</mark> DOM generator.
+        <code class="apidoc">
+            <mark>trix</mark>( ): ( ...children: TDOM[] | string[] ) => TDOM <span>(*)</span>
+            <dl>
+                <dt class="return">Returns</dt>
+                <dd class="return">( ...children: TDOM Node[] | string[] ) => TDOM</dd>
+                <dd class="return">A function to create trixified DOM (aka TDOM) nodes. 
+                    Using JS Proxy, the variable name on the left hand side will be set to a factory function that creates TDOM node of the name of the variable.
+                    For example, <span>(**)</span> DIV = <mark>trix</mark>() will create a factory function that when called will generate a &lt;div&gt; trixified DOM node and its children.
+                    TEXT is a special DOM generator that creates HTML text nodes.
+                </dd>
+            </dl>
+            <span>(*)</span> : TDOM denotes a trixified DOM Node.<br/>
+            <span>(**)</span>: Using ALL CAPS for TDOM factory functions is a readability convention.
+        </code>
+
+        <h5 id="trix_api_trixify"><mark>trix</mark>( node )</h5>
+        This adds the <mark>trix</mark>() method to the DOM node. "It trixifies the node"
+        <code class="apidoc">
+            <mark>trix</mark>( node: string | DOM Node, index?: number ): TDOM
+            <dl>
+                <dt>node</dt>
+                <dd>string | DOM node</dd>
+                <dd>If a string is passed in, it will be used to look up a DOM node in the document. 
+                    If the string starts with "#" we are looking for a tag of that name; 
+                    if the string starts with "." we are looking for a class of that name; 
+                    otherwise we are looking for a tag of that name<br>
+                    If a DOM node is passed in, that is the node that will be trixified.
+                </dd>
+                <dt>index?</dt>
+                <dd>number</dd>
+                <dd>For tag name or class name node input, the index is the index of the matching document node to use. Default is 0.</dd>
+                <dt class="return">Returns</dt>
+                <dd class="return">TDOM</dd>
+                <dd class="return">The Trixified DOM Node; the TDOM will have a <mark>trix</mark>() function.</dd>
+            </dl>
+        </code>
+
+        <h5 id="trix_api_children"><mark>trix</mark>( ...children )</h5>
+        TDOM Method defining the list of children for the node.
+        <code class="apidoc">
+            TDOM.<mark>trix</mark>( ...children: TDOM[] | string[] | [ TDOM | string ] | <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> ): TDOM
+            <dl>
+                <dt>...children</dt>
+                <dd>TDOM[] | string[] | [ TDOM | string ] | Trax</dd>
+                <dd>A trixified node, a string, a <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> element, or an array of the former.</dd>
+                <dt class="return">Returns</dt>
+                <dd class="return">TDOM</dd>
+                <dd class="return">The original TDOM (aka this)</dd>
+            </dl>
+        </code>
+
+        <h2 id="sample_applications">Sample applications</h2>
+        <p>To vette and demo the Trix solution I implemented several test applications.</p>
+        <h4 id="sample_todomvc">TodoMVC</h4>
+        <p><a href="https://github.com/0x1F528/Trix/tree/main/Examples/TodoMVC">This is the <mark>Trix</mark> implementation</a> of the wonderful <a href="https://todomvc.com/">TodoMVC</a> initiative. 
+            I used the <a href="https://github.com/1Marc/modern-todomvc-vanillajs">modern vanillajs TodoMVC</a> implementation as primary guide.</p>
+        <p>The TodoMVC demo is hosted as a <a href="https://0x1f528.github.io/Trix/Examples/TodoMVC/">github page</a> and included below in an iFrame.</p>
+        <iframe id="TodoMVCExample" title="Trix TodoMVC example" width="100%", height="650" src="https://0x1f528.github.io/Trix/Examples/TodoMVC/"></iframe>
+
+
+        <h4 id="sample_unit_converter">Unit converter</h4>
+        <p>Inspired by the google unit converter widget it demonstrates some of the benefits of using pub/sub reactive programming integrated into a UI application. 
+            It is a nice example of how using a pure javascript UI framework makes creating components and higher level abstractions easy.</p>
+        <p>The <a href="https://github.com/0x1F528/Trix/tree/main/Examples/UnitConvertor">source code</a> is in github, the demo is hosted as a <a href="https://0x1f528.github.io/Trix/Examples/UnitConvertor/">github page</a>, and included below in an iFrame.</p>
+        <iframe id="TodoMVCExample" title="Trix TodoMVC example" width="550", height="650" src="https://0x1f528.github.io/Trix/Examples/UnitConvertor/"></iframe>
+
+        <h4 id="sample_jsrepl">Javascript REPL</h4>
+        <p>This documentation makes extensive use of a REPL implemented in <mark>Trix</mark> around the codeflask (&ddagger;) code editor.</p>
+        <p>There is standalone <a href="https://0x1f528.github.io/Trix/Examples/JSRepl">demo version hosted on github pages</a> and the <a href="https://github.com/0x1F528/Trix/tree/main/utils/JSRepl">source code is here</a>.</p>
+
+        <h2 id="Acknowledgements">Acknowledgements</h2>
+        <p>(&ddagger;) The code editor is provided by <a href="https://github.com/kazzkiq/CodeFlask">CodeFlask</a>. The accompanying REPL was built using <mark>Trix</mark> and <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a>.</p>
+        <p>A special shout out to <a href="https://vanjs.org/">VanJS</a> for being such an inspiration. 
+            <mark>Trix</mark> lifts a lot of the ideas from VanJS. The main differences are the specifics of the APIs and the separate <a href="https://github.com/0x1F528/Trax"><mark>Trax</mark></a> reactive framework.
+            I recommend everyone take a look at the solution AND at the most beautiful, terse, and clean implementation!</p>
+
+
+        <div style="height:20em;"></div>
+
+
+    <!--
+        <article class="code-example">
+            <header>Second JS Code</header>
+            <code><pre>
+                import { trax, Trax } from 'https://0x1f528.github.io/Trax/modules/trax.js'
+                import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
+                const {H1, P, DIV, SPAN, EM} = trix();
+                trix(document.getElementsByTagName('app')[0]).trix(
+                <example>
+                        H1("Hello there!"),
+                        P(`Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                           Mauris iaculis, sapien sed interdum tincidunt, 
+                           massa libero pretium nibh, eu egestas velit elit sit amet leo.`),
+                        DIV ( 
+                                { 
+                                    style: 'width:10em;height:5em;'
+                                }, 
+                                SPAN(
+                                    "Proin ",
+                                    EM({ style:'color:red'}, "non ligula"),
+                                    " quis urna egestas imperdiet a non dui."
+                                )
+                            )
+                </example>
+                );
+            </pre></code>
+        </article>
+    -->
+
+        <script type="module" >
+            import { createRepl } from 'https://0x1f528.github.io/Trix/utils/JSRepl/jsrepl.js'
+
+            let examples = document.getElementsByClassName('code-example');
+            for (let example of examples) {
+                createRepl(example);
+            }            
+        </script>
+        
+    </body>
+</html>

@@ -1,0 +1,82 @@
+html {
+  width: 90%;
+  max-width: 50em;
+  margin: 0 auto;
+  color: rgb(0, 0, 110);
+  font-size:1.1em;
+}
+
+mark {
+  text-decoration-color: lightgrey;
+  background-color: lightyellow;
+  font-family: sans-serif;
+  font-weight: normal;
+}
+
+h2 {
+  margin-top: 3em;
+}
+h4 {
+  margin-top: 2.5em;
+}
+h5 {
+  margin-top: 2.5em;
+  text-decoration: underline;
+}
+
+article.figure {
+  display: flex;
+  flex-direction: row;
+}
+figcaption {
+  text-align: center;
+}
+
+table {
+  border: 2px solid rgb(140 140 140);
+  font-size: 0.8em;
+}
+
+th,
+td {
+  border: 1px solid rgb(160 160 160);
+}
+
+th {
+  text-align: left;
+  padding: 0.3em;
+}
+
+td {
+  text-align: center;
+}
+
+.apidoc {
+  background-color: #f0f0f0;
+  padding: 0.3em;
+}
+.apidoc span {
+  color: red;
+}
+.apidoc dl {
+  display: grid;
+  grid-template-columns: 10% 20% 65%;
+}
+.apidoc dt.return {
+  font-style: italic;
+}
+.apidoc .return {
+  padding-top: 0.6em;
+}
+
+ul,ol {
+  list-style-position: inside;
+}
+.important {
+  background-color: bisque;
+  padding: 0.5em;
+}
+
+
+
+
