@@ -175,14 +175,27 @@ let instrumentNode = (node) => {                                        // add t
     return node;
 }
 
-let trix = (node) => {                                                  // main entry point
+let trix = (node, index = 0) => {                                       // main entry point
     if (node === undefined) {                                           // either generate a new DOM element by tag
         return new Proxy(generateTag, {get: (tag, name) => tag.bind(undefined, name)});
-    } else {
-        return instrumentNode(node);                                    // or use this node as the insertion point
+    } else {                                                            // or look for the insertion point
+        if (typeof node === 'string') {
+            let parts = node.match(/(.)(.*)/);                          // the first character and everything else
+            switch (parts[1]) {                                         // what is the first character?
+                case '#': 
+                    node = document.getElementById(parts[2]);           // id is the everything else
+                    break;
+                case '.':                                               // class is the everything else
+                    node = document.getElementsByClassName(parts[2])[index];
+                    break;
+                default:
+                    node = document.getElementsByTagName(node)[index];  // tag is the whole string
+                    break;
+            }
+        }
+        return instrumentNode(node);                                    // use this node as the insertion point
     }
 }
-
 
 export  { trix }
 
