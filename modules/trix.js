@@ -62,20 +62,23 @@ let configProps = (node, props) => {                                    // pull 
                 setAttribute(inAttr)(arg());                            // set the attribute
             } 
             if (outAttr) {                                              // add the output attribute
-                node[outAttr] = (val) => {                              // output attributes are handled by attaching a function to the dom that will fire on event
+                node[outAttr] = (elem) => {                             // output attributes are handled by attaching a function to the dom that will fire on event
                     switch(attribute) {                                 // different behaviors depending on attribute
                         case 'onkeyup':
                         case 'onkeydown':
-                            arg(val.key);                               // set the val.key
+                            arg(elem.key);                              // set the elem.key
                             break;
                         case 'checkbox':
-                            arg(val.target.checked)                     // set the val.target.checked
+                            arg(elem.target.checked);                   // set the elem.target.checked
                             break;
                         case 'onclick':
                             (Trax.isTrax(arg)) ? arg.fire() : arg(true);// fire the event
                             break;
+                        case 'onfocus':
+                            arg(elem.target);
+                            break;
                         default:
-                            arg(val.target.value);                      // set the val.target.value
+                            arg(elem.target.value);                     // set the elem.target.value
                     }
                 };
             }
