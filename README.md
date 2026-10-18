@@ -18,7 +18,7 @@ Trix is a minimal yet powerful javascript _only_ UI framework.
 import { trix } from 'https://0x1f528.github.io/Trix/modules/trix.js'
 
 // Get selected DOM element generators
-const {H1, P, DIV, SPAN} = trix();
+const {H1, P, DIV, SPAN, EM} = trix();
 
 // Add trix capabilities to a DOM node (a tag called <app>, in this case)
 const appNode = document.getElementsByTagName('app')[0];
@@ -61,6 +61,97 @@ setTimeout(
 // Several complete demo applications are under the examples directory.
 
 ```
+
+## Checkpoints and cleanup
+
+The construction API remains `DIV(...)`, `P(...)`, and `node.trix(...)`.
+Calling `node.trix()` now clears its children. Instrumenting a live node twice
+returns the same renderer. Trix tracks bindings without using Trax private fields.
+
+A checkpoint collects newly created Trix views, nested checkpoints, and registered
+resources. Returning from construction stops collection; it does not dispose the
+view. Removing the checkpoint's last returned view root through a Trix render
+automatically disposes the checkpoint, including its non-DOM resources.
+
+```javascript
+import { trix, checkpoint, onCleanup, dispose } from './modules/trix.js';
+import { trax } from 'https://0x1f528.github.io/Trax/modules/trax.js';
+
+const { DIV, P } = trix();
+const mount = trix('#app');
+const message = trax('Ready'); // shared source, not owned by the view
+
+const view = checkpoint(() => {
+    const timer = setInterval(() => message(new Date().toLocaleTimeString()), 1000);
+    onCleanup(() => clearInterval(timer));
+    return DIV(P(message));
+});
+
+mount.trix(view.value);
+// Later: removes the view, releases its bindings, and clears the timer.
+mount.trix();
+// Explicit disposal is also available and is safe to repeat.
+view.dispose();
+```
+
+`checkpoint(build)` returns a handle with `value`, `disposed`, `run(build)`,
+`own(cleanup)`, and `dispose()`. `onCleanup(cleanup)` registers with the current
+checkpoint and returns an idempotent function for early resource release.
+Child checkpoints dispose before their parents. Cleanup continues after errors;
+one error is rethrown and multiple errors use `AggregateError`.
+
+Construction is synchronous. Async builders and promise results are rejected.
+For later synchronous work, retain the handle and use `view.run(() => ...)`, or
+register a disposer explicitly with `view.own(...)`. A failed entry cleans up
+only the resources acquired during that entry; existing resources stay alive.
+Use `onCleanup` for timers, listeners installed outside Trix, and raw Trax effects
+that need explicit deregistration. Trix-owned bindings are collected automatically.
+
+Existing views and shared sources retain their original ownership when merely
+used inside another checkpoint. For multiple returned view roots, automatic
+checkpoint disposal waits until all those roots are removed. A checkpoint
+returning non-DOM data requires explicit disposal.
+
+`dispose(node)` and `node.trix.dispose()` recursively release a view, including
+views under ordinary DOM wrappers. Explicit disposal leaves the DOM visible but
+inactive. External DOM removals must call `dispose`; Trix does not install a
+global mutation observer. Rendering a disposed node throws until it is explicitly
+reinstrumented with `trix(node)`.
+
+## Rendering and bindings
+
+Reconciliation keeps unchanged nodes attached, reuses matching text nodes, and
+supports native text nodes, comments, and fragments. Native state-preserving moves
+are used when available for connected nodes in the same document; other moves
+use `insertBefore`. Unchanged focused inputs retain focus and selection.
+
+Content dependencies include Trax values nested in arrays or returned by child
+functions. Dependencies are replaced as content changes. Trix does not intercept
+arbitrary hidden reads inside callbacks; return the Trax value itself when you
+want it to become a dependency. The `text(...)` factory now supports reactive text.
+Recursive child expressions and invalid insertion points produce explicit errors.
+
+Properties and events have separate replaceable bindings. Changing a reactive
+property to another source or a literal releases its previous subscription.
+Omitted properties remain configured: child-list rendering does not implicitly
+reset all attributes. Existing `io`, `checkbox`, `for`, and event argument
+conventions are retained. Plain event callbacks also receive the original event
+as their second argument. Disposed views release their handlers.
+
+Strings continue to decode HTML entities for compatibility; they are inserted as
+text, not HTML. Ownership metadata is held in weak maps, and removed views stop
+reacting, including when an ASYNC update was queued before removal.
+
+## Browser tests
+
+Run `npm test` for all compatibility, regression, and checkpoint/ownership suites.
+The checkpoint contracts are enabled and regressions are ordinary passing tests
+once their defects are fixed. See [the harness guide](tests/browser/README.md)
+for focused commands, probes, traces, and local Trax configuration.
+
+The harness uses the sibling refactored Trax checkout. The production remote
+import URL is retained; deploy the refactored libraries together to obtain the
+updated Trax propagation guarantees.
 
 ## Documentation
 

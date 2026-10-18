@@ -1,0 +1,16 @@
+{
+  "name": "trix-browser-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:compat": "playwright test --project=compatibility",
+    "test:regressions": "playwright test --project=regressions",
+    "test:contracts": "playwright test --project=checkpoints",
+    "test:report": "playwright show-report",
+    "test:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}
